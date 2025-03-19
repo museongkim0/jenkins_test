@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: kms
+  name: backend-deployment-green
+spec:
+  selector:
+    matchLabels:
+      type: backend
+      deployment: green
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+  minReadySeconds: 10
+  template:
+    metadata:
+      labels:
+        type: backend
+        deployment: green
+    spec:
+      containers:
+        - name: backend-green
+          image: mstar228/backend:$BUILD_ID
+          ports:
+            - containerPort: 8080
+
+      terminationGracePeriodSeconds: 0

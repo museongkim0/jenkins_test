@@ -1,0 +1,73 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = 'mstar228/backend'
+        IMAGE_TAG = "${BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Git Clone') {
+            steps {
+                echo "Cloning Repository"
+                git branch: 'main', url: 'https://github.com/museongkim0/jenkins_test.git'
+            }
+        }
+        stage('Gradle Build') {
+            steps {
+                echo "Add Permission"
+                sh 'chmod +x /var/lib/jenkins/workspace/backend/backend/gradlew'
+
+                echo "delete build"
+                sh 'rm -rf /var/lib/jenkins/workspace/backend/backend/build'
+
+                echo "Move to backend and Build"
+                sh 'cd /var/lib/jenkins/workspace/backend/backend && ./gradlew bootJar'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("${IMAGE_NAME}:${IMAGE_TAG}", "/var/lib/jenkins/workspace/backend/backend")
+                }
+            }
+        }
+        stage('Push to Registry') {
+            steps {
+                script {
+                    withDockerRegistry([credentialsId: 'DOCKER_HUB']) {
+                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
+                    }
+                }
+            }
+        }
+        stage('SSH') {
+            steps{
+                script{
+                    sshPublisher(
+                        publishers: [
+                            sshPublisherDesc(
+                                configName: 'k8s',
+                                verbose: true,
+                                transfers: [
+                                    sshTransfer(
+                                        sourceFiles: 'k8s/backend-deployment.yml',
+                                        remoteDirectory: '/',
+                                        execCommand: '''
+                                            sed -i "s/latest/$BUILD_ID/g" k8s/backend-deployment.yml
+                                        '''
+                                    ),
+                                    sshTransfer(
+                                        execCommand: '''
+                                            kubectl apply -f /home/test/k8s/backend-deployment.yml
+                                        '''
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                }
+            }
+        }
+    }
+}
