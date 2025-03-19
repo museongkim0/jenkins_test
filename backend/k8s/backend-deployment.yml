@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: kms
-  name: backend-deployment-green
+  name: backend-deployment-test
 spec:
   selector:
     matchLabels:
