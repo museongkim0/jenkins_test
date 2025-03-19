@@ -6,8 +6,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      type: backend
-      deployment: green
+      app: backend
   replicas: 2
   strategy:
     type: RollingUpdate
@@ -15,13 +14,10 @@ spec:
   template:
     metadata:
       labels:
-        type: backend
-        deployment: green
+        app: backend
     spec:
       containers:
-        - name: backend-green
+        - name: backend
           image: mstar228/backend:latest
           ports:
             - containerPort: 8080
-
-      terminationGracePeriodSeconds: 0
