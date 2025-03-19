@@ -10,7 +10,7 @@ public class TestController {
 
     @GetMapping("/ex")
     public String test() {
-        return "GreenV";
+        return "V1";
     }
 
     @GetMapping("/ex2")
