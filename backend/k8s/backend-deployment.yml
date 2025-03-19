@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: backend-green
-          image: mstar228/backend:$BUILD_ID
+          image: mstar228/backend:latest
           ports:
             - containerPort: 8080
 
