@@ -54,12 +54,12 @@ pipeline {
                                         sourceFiles: 'backend/k8s/backend-deployment.yml',
                                         remoteDirectory: '/',
                                         execCommand: '''
-                                            sed -i "s/latest/$BUILD_ID/g" k8s/backend-deployment.yml
+                                            sed -i "s/latest/$BUILD_ID/g" backend/k8s/backend-deployment.yml
                                         '''
                                     ),
                                     sshTransfer(
                                         execCommand: '''
-                                            kubectl apply -f /home/test/k8s/backend-deployment.yml
+                                            kubectl apply -f /home/test/backend/k8s/backend-deployment.yml
                                         '''
                                     )
                                 ]
