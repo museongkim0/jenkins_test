@@ -28,9 +28,11 @@ jobs:
           password: $DOCKERHUP_PASSWORD
     working_directory: ~/project
     steps:
+      - checkout
       - attach_workspace:
           at: ~/project
-      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
           name: Build Docker Image
           command: |
