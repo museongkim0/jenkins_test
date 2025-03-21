@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'mstar228/backend'
+        IMAGE_NAME = 'mstar228/edulink-backend'
         IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
@@ -10,25 +10,26 @@ pipeline {
         stage('Git Clone') {
             steps {
                 echo "Cloning Repository"
-                git branch: 'main', url: 'https://github.com/museongkim0/jenkins_test.git'
+                git url: 'https://github.com/museongkim0/jenkins_test.git',
+                    branch: "${env.GIT_BRANCH.replace('origin/', '')}"
             }
         }
         stage('Gradle Build') {
             steps {
                 echo "Add Permission"
-                sh 'chmod +x /var/lib/jenkins/workspace/backend/backend/gradlew'
+                sh 'chmod +x /var/lib/jenkins/workspace/edulink/backend/gradlew'
 
-                echo "delete build"
-                sh 'rm -rf /var/lib/jenkins/workspace/backend/backend/build'
+                echo "Delete build"
+                sh 'rm -rf /var/lib/jenkins/workspace/edulink/backend/build'
 
                 echo "Move to backend and Build"
-                sh 'cd /var/lib/jenkins/workspace/backend/backend && ./gradlew bootJar'
+                sh 'cd /var/lib/jenkins/workspace/edulink/backend && ./gradlew bootJar'
             }
         }
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${IMAGE_NAME}:${IMAGE_TAG}", "/var/lib/jenkins/workspace/backend/backend")
+                    docker.build("${IMAGE_NAME}:${IMAGE_TAG}", "/var/lib/jenkins/workspace/edulink/backend")
                 }
             }
         }
@@ -42,8 +43,11 @@ pipeline {
             }
         }
         stage('SSH') {
-            steps{
-                script{
+            when {
+                expression { env.GIT_BRANCH == 'origin/main' }
+            }
+            steps {
+                script {
                     sshPublisher(
                         publishers: [
                             sshPublisherDesc(
@@ -51,10 +55,34 @@ pipeline {
                                 verbose: true,
                                 transfers: [
                                     sshTransfer(
+                                        sourceFiles: 'backend/k8s/backend-cm.yml',
+                                        remoteDirectory: '/',
+                                        execCommand: '''
+                                            sed -i "s/latest/$BUILD_ID/g" backend/k8s/backend-cm.yml
+                                        '''
+                                    ),
+                                    sshTransfer(
+                                        sourceFiles: 'backend/k8s/backend-svc.yml',
+                                        remoteDirectory: '/',
+                                        execCommand: '''
+                                            sed -i "s/latest/$BUILD_ID/g" backend/k8s/backend-svc.yml
+                                        '''
+                                    ),
+                                    sshTransfer(
                                         sourceFiles: 'backend/k8s/backend-deployment.yml',
                                         remoteDirectory: '/',
                                         execCommand: '''
                                             sed -i "s/latest/$BUILD_ID/g" backend/k8s/backend-deployment.yml
+                                        '''
+                                    ),
+                                    sshTransfer(
+                                        execCommand: '''
+                                            kubectl apply -f /home/test/backend/k8s/backend-cm.yml
+                                        '''
+                                    ),
+                                    sshTransfer(
+                                        execCommand: '''
+                                            kubectl apply -f /home/test/backend/k8s/backend-svc.yml
                                         '''
                                     ),
                                     sshTransfer(

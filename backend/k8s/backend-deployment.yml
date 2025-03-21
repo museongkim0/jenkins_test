@@ -2,11 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: kms
-  name: backend-deployment-test
+  name: backend-deployment-edulink
 spec:
   selector:
     matchLabels:
-      app: backend
+      type: backend
   replicas: 2
   strategy:
     type: RollingUpdate
@@ -14,10 +14,13 @@ spec:
   template:
     metadata:
       labels:
-        app: backend
+        type: backend
     spec:
       containers:
         - name: backend
-          image: mstar228/backend:latest
+          image: mstar228/edulink-backend:latest
+          envFrom:
+            - configMapRef:
+                name: backend-cm
           ports:
             - containerPort: 8080
