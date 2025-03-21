@@ -6,7 +6,7 @@ jobs:
   gradle-build:
     docker:
       - image: cimg/openjdk:17.0
-    working_directory: ~/project
+    working_directory: ~/backend
     steps:
       - checkout
       - run:
