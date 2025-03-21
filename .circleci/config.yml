@@ -14,10 +14,7 @@ jobs:
           command: chmod +x ./backend/gradlew
       - run:
           name: Gradle Build
-          command: cd backend
-      - run:
-          name: Gradle Build
-          command: ./gradlew bootJar
+          command: cd backend && ./gradlew bootJar
       - persist_to_workspace:
           root: .
           paths:
