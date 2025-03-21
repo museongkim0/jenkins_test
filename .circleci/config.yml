@@ -100,6 +100,6 @@ workflows:
           requires:
             - gradle-build
       - node-build
-          - docker-build-and-push-front:
+      - docker-build-and-push-front:
           requires:
             - node-build
