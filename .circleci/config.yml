@@ -13,7 +13,7 @@ jobs:
           name: Add Permission
           command: chmod +x gradlew
       - run:
-          nmae: Gradle Build
+          name: Gradle Build
           command: ./gradlew bootJar
       - persist_to_workspace:
           root:
