@@ -6,19 +6,19 @@ jobs:
   gradle-build:
     docker:
       - image: cimg/openjdk:17.0
-    working_directory: ~/backend
+    working_directory: ~/project
     steps:
       - checkout
       - run:
           name: Add Permission
-          command: chmod +x gradlew
+          command: chmod +x ./backend/gradlew
       - run:
           name: Gradle Build
-          command: ./gradlew bootJar
+          command: ./backend/gradlew bootJar
       - persist_to_workspace:
           root:
           paths:
-            - build/libs/*.jar
+            - backend/build/libs/*.jar
 workflows:
   version: 2
   build-and-deploy:
